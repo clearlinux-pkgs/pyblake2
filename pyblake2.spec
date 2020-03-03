@@ -4,7 +4,7 @@
 #
 Name     : pyblake2
 Version  : 1.1.2
-Release  : 5
+Release  : 6
 URL      : https://files.pythonhosted.org/packages/a6/ea/559658f48713567276cabe1344a9ef918adcb34a9da417dbf0a2f7477d8e/pyblake2-1.1.2.tar.gz
 Source0  : https://files.pythonhosted.org/packages/a6/ea/559658f48713567276cabe1344a9ef918adcb34a9da417dbf0a2f7477d8e/pyblake2-1.1.2.tar.gz
 Summary  : BLAKE2 hash function extension module
@@ -21,8 +21,22 @@ BuildRequires : tox
 BuildRequires : virtualenv
 
 %description
-pyblake2 â BLAKE2 hash function for Python
-==========================================
+pyblake2 is an extension module for Python implementing BLAKE2 hash function.
+
+BLAKE2 is a cryptographic hash function, which offers highest security while
+being as fast as MD5 or SHA-1, and comes in two flavors:
+
+* BLAKE2b, optimized for 64-bit platforms and produces digests of any size
+  between 1 and 64 bytes,
+
+* BLAKE2s, optimized for 8- to 32-bit platforms and produces digests of any
+  size between 1 and 32 bytes.
+
+BLAKE2 supports keyed mode (a faster and simpler replacement for HMAC),
+salted hashing, personalization, and tree hashing.
+
+Hash objects from this module follow the API of standard library's
+`hashlib` objects.
 
 %package license
 Summary: license components for the pyblake2 package.
@@ -45,6 +59,7 @@ python components for the pyblake2 package.
 Summary: python3 components for the pyblake2 package.
 Group: Default
 Requires: python3-core
+Provides: pypi(pyblake2)
 
 %description python3
 python3 components for the pyblake2 package.
@@ -52,20 +67,31 @@ python3 components for the pyblake2 package.
 
 %prep
 %setup -q -n pyblake2-1.1.2
+cd %{_builddir}/pyblake2-1.1.2
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1551028055
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1583204837
+# -Werror is for werrorists
+export GCC_IGNORE_WERROR=1
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 export MAKEFLAGS=%{?_smp_mflags}
 python3 setup.py build
 
 %install
+export MAKEFLAGS=%{?_smp_mflags}
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/pyblake2
-cp COPYING %{buildroot}/usr/share/package-licenses/pyblake2/COPYING
+cp %{_builddir}/pyblake2-1.1.2/COPYING %{buildroot}/usr/share/package-licenses/pyblake2/e6de325214367c544f578bdd065aa370ee293b3e
 python3 -tt setup.py build  install --root=%{buildroot}
 echo ----[ mark ]----
 cat %{buildroot}/usr/lib/python3*/site-packages/*/requires.txt || :
@@ -76,7 +102,7 @@ echo ----[ mark ]----
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/pyblake2/COPYING
+/usr/share/package-licenses/pyblake2/e6de325214367c544f578bdd065aa370ee293b3e
 
 %files python
 %defattr(-,root,root,-)
